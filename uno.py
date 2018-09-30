@@ -9,7 +9,7 @@ class Card():
     def __init__(self, value, color):
         self.value = value
         self.color = color
-        self.isAction = isinstance(value, str)
+        self.is_action = isinstance(value, str)
 
     def __str__(self):
         return card_format(self)
@@ -28,7 +28,7 @@ class Player():
             print(idx, ". ", card, sep="", end="   ")
         print("\n")
     
-    def step(self, top_card):
+    def step(self, top_card, next_card):
         self.display_cards()
         
         invalid_card = True
@@ -48,14 +48,15 @@ class Player():
                     if value_match or color_match:
                         chosen_card = self.cards[step]
                         del self.cards[step]
-                        return chosen_card
+                        return chosen_card, False
                     else:
                         stdout.write("\rThis card cannot be played\n")
                 else:
                     stdout.write("\rThis card does not exist\n")
         else:
+            self.cards.append(next_card)
             # handle getting a new card
-            return top_card
+            return top_card, True
             pass
         
     def sort_hand(self):
@@ -96,11 +97,15 @@ class Uno():
         del self.deck[0]
         
         turn = 0
-        while reduce(lambda player_1, player_2:
-                     len(player_1.cards) * len(player_2.cards), self.players):
+        while len(self.deck) > 0 and reduce(lambda player_1, player_2:
+                len(player_1.cards) * len(player_2.cards), self.players):
             print("Card on top:", self.top_card)
             print("Player {0}'s turn:".format(turn % self.num_players + 1))
-            self.top_card = self.players[turn].step(self.top_card)
+            self.top_card, got_new_card = self.players[turn].step(self.top_card, self.deck[0])
+
+            if got_new_card:
+                del self.deck[0]
+
             turn = (turn + 1) % self.num_players
     
 game = Uno(2)
