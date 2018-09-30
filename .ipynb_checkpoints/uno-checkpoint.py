@@ -34,18 +34,15 @@ class Player():
         invalid_card = True
         step = -1
         
-        any_value_match = any(map(lambda card: card.value == top_card.value, self.cards))
-        any_color_match = any(map(lambda card: card.color == top_card.color, self.cards))
+        value_match = any(map(lambda card: card.value == top_card.value, self.cards))
+        color_match = any(map(lambda card: card.color == top_card.color, self.cards))
         
-        if any_value_match and any_color_match:
+        if value_match and color_match:
             while invalid_card:
                 step = int(input("\rEnter the number of the card you would like to play: "))
                 if 0 <= step < len(self.cards):
-                    
-                    value_match = self.cards[step].value == top_card.value
                     color_match = self.cards[step].color == top_card.color
-                    
-                    if value_match or color_match:
+                    if color_match:
                         chosen_card = self.cards[step]
                         del self.cards[step]
                         return chosen_card
@@ -53,10 +50,8 @@ class Player():
                         stdout.write("\rThis card cannot be played\n")
                 else:
                     stdout.write("\rThis card does not exist\n")
-        else:
-            # handle getting a new card
-            return top_card
-            pass
+                
+        return step
         
     def sort_hand(self):
         # Logic for sorting cards in hand
@@ -92,13 +87,13 @@ class Uno():
     
     def start(self):
         self.top_card = self.deck[0]
-        print("Hellu", self.top_card)
+        print(self.top_card)
         del self.deck[0]
         
         turn = 0
         while reduce(lambda player_1, player_2:
                      len(player_1.cards) * len(player_2.cards), self.players):
-            print("Card on top:", self.top_card)
+            print("Card on top:", card_format(self.top_card))
             print("Player {0}'s turn:".format(turn % self.num_players + 1))
             self.top_card = self.players[turn].step(self.top_card)
             turn = (turn + 1) % self.num_players
