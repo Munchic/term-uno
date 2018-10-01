@@ -164,7 +164,10 @@ class Uno():
                 self.turn = self.next_turn()
 
     def announce_winner(self):
-        pass
+        self.clear_screen()
+        for i in range(len(self.players)):
+            if len(self.players[i].cards) == 0:
+                print("Player {0} has won! Yay!".format(i+1))
     
 
     '''
