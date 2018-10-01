@@ -1,6 +1,5 @@
 from random import shuffle
 from functools import reduce
-from sys import stdout
 
 class Card():
     colors = ['red', 'green', 'blue', 'yellow']
@@ -41,8 +40,15 @@ class Player():
         if any_value_match or any_color_match:
             while invalid_card:
                 # Handle ew inputs
-                step = int(input("\rEnter the number of the card you would like to play: "))
-                if 0 <= step < len(self.cards):
+                step = input("\rEnter the number of the card you would like to play: ")
+                try:
+                    step = int(step)
+                    invalid_card = False
+                except ValueError:
+                    print("This is not a number. Please try again.")
+
+
+                if not invalid_card and 0 <= step < len(self.cards):
                     
                     value_match = self.cards[step].value == top_card.value
                     color_match = self.cards[step].color == top_card.color
@@ -52,9 +58,11 @@ class Player():
                         del self.cards[step]
                         return chosen_card, False
                     else:
-                        stdout.write("\rThis card cannot be played\n")
-                else:
-                    stdout.write("\rThis card does not exist\n")
+                        print("This card cannot be played.")
+                        invalid_card = True
+
+                    if not 0 <= step < len(self.cards):
+                        print("This card does not exist.")
         else:
             while step == -1:
                 step = input("Pick a card from the deck or skip (get/skip): ")
@@ -98,7 +106,8 @@ class Uno():
             cards_to_hand = self.deck[:7] # fetch 7 cards from the top of the deck
             del self.deck[:7] # constant time card removal
             players.append(Player(cards_to_hand))
-        
+        print(players)
+
         return players
 
 
@@ -127,9 +136,12 @@ class Uno():
         if top_value == 'reverse':
             self.rotation *= -1
         elif top_value in ['color switch', '+4']:
-            color = input("Choose the next color (red, green, blue, yellow): ")
-            if color in Card.colors:
-                self.top_card.color = color
+            invalid_color = True
+            while invalid_color:
+                color = input("Choose the next color (red, green, blue, yellow): ")
+                if color in Card.colors:
+                    self.top_card.color = color
+                invalid_color = False
 
         action = {"act": self.top_card.value, "at_turn": self.next_turn(), "used": False}
         self.current_action = action
@@ -165,8 +177,7 @@ class Uno():
         self.turn = 0
         self.rotation = 1
         self.current_action = {"act": None, "at_turn": None, "used": None}
-        while len(self.deck) > 0 and reduce(lambda player_1, player_2:
-                len(player_1.cards) * len(player_2.cards), self.players):
+        while len(self.deck) > 0 and all(map(lambda player: len(player.cards) > 0, self.players)):
             self.handle_action()
             self.display_ready_screen()
 
@@ -190,5 +201,17 @@ class Uno():
 '''
 UNO GAME
 '''
-game = Uno(2)
-game.players[0].display_cards()
+print("WELCOME TO THE UNO GAME!\n")
+invalid_input = True
+
+while invalid_input:
+    num_players = input("Please enter the number of players (2-8): ")
+
+    try:
+        num_players = int(num_players)
+        if 2 <= num_players <= 8: 
+            invalid_input = False
+    except ValueError:
+        print("This is not an integer. Please try again.")
+
+game = Uno(num_players)
